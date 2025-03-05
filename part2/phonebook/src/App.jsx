@@ -102,13 +102,15 @@ const App = () => {
           })
           .catch(error => {
             console.error('Failed to update person:', error)
-            setMessage({ text: `Information of '${existingPerson.name}' has already been removed from server`, type: 'error' })
-            setPersons(persons.filter(person => person.id !== existingPerson.id));
+            if (error.response && error.response.status === 404) { 
+              setMessage({ text: `Information of '${existingPerson.name}' has already been removed from server`, type: 'error' })
+              setPersons(persons.filter(person => person.id !== existingPerson.id))
+            } else {
+              setMessage({ text: `Failed to update '${existingPerson.name}'. Please try again.`, type: 'error' })
+            }
             setTimeout(() => {
               setMessage(null)
             }, 5000)
-            setNewName('');
-            setNewPhone('');
           })
       }
     }
@@ -131,8 +133,10 @@ const App = () => {
           console.log(response.data);
         })
         .catch(error => {
-          console.error('Failed to add person:', error)
-          alert('There was an error adding the person.')
+         setMessage({ text: error.response.data.error, type: 'error' })
+          setTimeout(() => {
+            setMessage("")
+          }, 5000)
         })
     }
   }
